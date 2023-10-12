@@ -7,6 +7,8 @@ import numpy as np
 import time
 import random
 from collections import defaultdict
+
+import preprocess_datasets
 from UV_Encoders import UV_Encoder
 from UV_Aggregators import UV_Aggregator
 from Social_Encoders import Social_Encoder
@@ -19,6 +21,7 @@ from math import sqrt
 import datetime
 import argparse
 import os
+import json
 
 """
 GraphRec: Graph Neural Networks for Social Recommendation. 
@@ -126,21 +129,66 @@ def main():
     parser.add_argument('--lr', type=float, default=0.001, metavar='LR', help='learning rate')
     parser.add_argument('--test_batch_size', type=int, default=1000, metavar='N', help='input batch size for testing')
     parser.add_argument('--epochs', type=int, default=100, metavar='N', help='number of epochs to train')
+    parser.add_argument('--dataset', type=str, default='ciao', help='which dataset to use')
+
+    parser.add_argument('--is_remove_zero_ratings', type=bool, default=False, help='Remove zero ratings from the dataset.')
+    parser.add_argument('--is_remove_duplicates', type=bool, default=False, help='Remove duplicate ratings from the dataset.')
+    parser.add_argument('--is_remove_users_with_no_ratings', type=bool, default=False, help='Remove users with no ratings from the dataset.')
+    parser.add_argument('--is_remove_users_with_no_connections', type=bool, default=False, help='Remove users with no connections from the dataset.')
+    parser.add_argument('--convert_to_undirected', type=bool, default=False, help='Convert trust network to undirected.')
+    parser.add_argument('--users_from_test_must_be_in_train', type=bool, default=False, help='Users from test or validation set must be in train set.')
+
+    parser.add_argument('--min_user_num_ratings', type=int, default=1, help='Minimum number of ratings per user.')
+    parser.add_argument('--min_item_num_ratings', type=int, default=1, help='Minimum number of ratings per item.')
+    parser.add_argument('--keep_only_lcc', type=bool, default=False, help='Keep only the largest connected component.')
+    parser.add_argument('--keep_only_best_community', type=bool, default=False, help='Keep only the best community.')
+
+    parser.add_argument('--test_ratio', type=float, default=0.2, help='Test ratio.')
+    parser.add_argument('--validation_ratio', type=float, default=0.5, help='Validation ratio.')
+    parser.add_argument('--store_validation', type=bool, default=False, help='Store the validation set.')
+    parser.add_argument('--gpu_id', type=int, default=0, help='GPU id.')
+    parser.add_argument('--use_gpu', type=bool, default=True, help='Use GPU.')
+    parser.add_argument('--hyperparam_search', type=bool, default=False, help='Hyperparameter search.')
     args = parser.parse_args()
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+    os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu_id)
     use_cuda = False
-    if torch.cuda.is_available():
+    if torch.cuda.is_available() and args.use_gpu:
         use_cuda = True
     device = torch.device("cuda" if use_cuda else "cpu")
+    print(device)
 
     embed_dim = args.embed_dim
-    dir_data = './data/toy_dataset'
+    if args.dataset == 'toy_dataset':
+        dir_data = f'./data/processed/graphrec/{args.dataset}/{args.dataset}'
+    else:
+        preprocess_datasets.process_dataset(args.dataset, args)
+        input_name = (f"{args.dataset}_"
+                      f"r0-{args.is_remove_zero_ratings}_"
+                      f"rd-{args.is_remove_duplicates}_"
+                      f"runr-{args.is_remove_users_with_no_ratings}_"
+                      f"runconn-{args.is_remove_users_with_no_connections}_"
+                      f"undir-{args.convert_to_undirected}_"
+                      f"testtrain-{args.users_from_test_must_be_in_train}_"
+                      f"minur-{args.min_user_num_ratings}_"
+                      f"minir-{args.min_item_num_ratings}"
+                      f"_lcc_{args.keep_only_lcc}"
+                      f"_bcomm_{args.keep_only_best_community}")
+        dir_data = f'./data/processed/graphrec/{args.dataset}/{input_name}'
 
     path_data = dir_data + ".pickle"
     data_file = open(path_data, 'rb')
-    history_u_lists, history_ur_lists, history_v_lists, history_vr_lists, train_u, train_v, train_r, test_u, test_v, test_r, social_adj_lists, ratings_list = pickle.load(
-        data_file)
+
+    if args.dataset == 'toy_dataset':
+        history_u_lists, history_ur_lists, history_v_lists, history_vr_lists, train_u, train_v, train_r, test_u, test_v, test_r, social_adj_lists, ratings_list = pickle.load(data_file)
+    else:
+        print(input_name)
+        history_u_lists, history_ur_lists, history_v_lists, history_vr_lists, train_u, train_v, train_r, test_u, test_v, test_r, valid_u, valid_v, valid_r, social_adj_lists, ratings_list, item_categories = pickle.load(data_file)
+        if args.hyperparam_search == False:
+            test_u = np.concatenate((test_u, valid_u))
+            test_v = np.concatenate((test_v, valid_v))
+            test_r = np.concatenate((test_r, valid_r))
+
     """
     ## toy dataset 
     history_u_lists, history_ur_lists:  user's purchased history (item set in training set), and his/her rating score (dict)
@@ -162,7 +210,9 @@ def main():
     train_loader = torch.utils.data.DataLoader(trainset, batch_size=args.batch_size, shuffle=True)
     test_loader = torch.utils.data.DataLoader(testset, batch_size=args.test_batch_size, shuffle=True)
     num_users = history_u_lists.__len__()
+    # num_items = max(train_u.tolist() + test_u.tolist()) + 1
     num_items = history_v_lists.__len__()
+    # num_items = max(train_v.tolist() + test_v.tolist()) + 1
     num_ratings = ratings_list.__len__()
 
     u2e = nn.Embedding(num_users, embed_dim).to(device)
@@ -189,6 +239,22 @@ def main():
     best_rmse = 9999.0
     best_mae = 9999.0
     endure_count = 0
+    if args.dataset == 'toy_dataset':
+        results_dir = f'./data/processed/graphrec/{args.dataset}/results'
+        results_filename = f'{args.dataset}_results.json'
+    else:
+        results_dir = f'./data/processed/graphrec/{args.dataset}/results'
+        results_filename = f'{input_name}_results.json'
+    os.makedirs(results_dir, exist_ok=True)
+
+    results = {
+        "best_rmse": best_rmse,
+        "best_mae": best_mae,
+        "epoch": 0
+    }
+
+    with open(f'{results_dir}/{results_filename}', 'w') as json_file:
+        json.dump(results, json_file)
 
     for epoch in range(1, args.epochs + 1):
 
@@ -200,6 +266,13 @@ def main():
         if best_rmse > expected_rmse:
             best_rmse = expected_rmse
             best_mae = mae
+            results = {
+                "best_rmse": str(round(best_rmse, 6)),
+                "best_mae": str(round(best_mae, 6)),
+                "epoch": epoch
+            }
+            with open(f'{results_dir}/{results_filename}', 'w') as json_file:
+                json.dump(results, json_file)
             endure_count = 0
         else:
             endure_count += 1
@@ -210,4 +283,8 @@ def main():
 
 
 if __name__ == "__main__":
+    start_time = time.time()
     main()
+    end_time = time.time()
+    print("time: %.2f min" % ((end_time - start_time) / 60))
+
