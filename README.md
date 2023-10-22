@@ -1,77 +1,117 @@
-# GraphRec-WWW19
-
-## GraphRec: Graph Neural Networks for Social Recommendation
-
-This is our implementation for the paper:
-
-[**<u>Wenqi Fan</u>**](https://wenqifan03.github.io), Yao Ma , Qing Li, Yuan He, Eric Zhao, Jiliang Tang, and Dawei Yin. [Graph Neural Networks for Social Recommendation](https://arxiv.org/pdf/1902.07243.pdf). 
-In Proceedings of the 28th International Conference on World Wide Web (WWW), 2019. 
-Preprint[https://arxiv.org/abs/1902.07243]
-
-
-## Abstract
-In recent years, Graph Neural Networks (GNNs), which can naturally integrate node information and topological structure, have been demonstrated to be powerful in learning on graph data. These advantages of GNNs provide great potential to ad- vance social recommendation since data in social recommender systems can be represented as user-user social graph and user-item graph; and learning latent factors of users and items is the key. However, building social recommender systems based on GNNs faces challenges. For example, the user-item graph encodes both interactions and their associated opinions; social relations have heterogeneous strengths; users involve in two graphs (e.g., the user-user social graph and the user-item graph). To address the three aforementioned challenges simultaneously, in this paper, we present a novel graph neural network framework (GraphRec) for social recommendations. In particular, we provide a principled approach to jointly capture interactions and opinions in the user-item graph and propose the framework GraphRec, which coherently models two graphs and heterogeneous strengths. Extensive experiments on two real-world datasets demonstrate the effectiveness of the proposed framework GraphRec.
-
-
+# Reproducing GraphRec for Top-K Evaluation: A Case Study on Diversity Metrics
 
 ## Introduction
- Graph Data in Social Recommendation. It contains two graphs including the user-item graph (left part) and the user-user social graph (right part). Note that the number on the edges of the user-item graph denotes the opinions (or rating score) of users on the items via the interactions.
-![ 123](intro.png "Social Recommendations")
 
+This repository is an adaptation and extension of the original [GraphRec implementation](https://github.com/wenqifan03/GraphRec-WWW19) by Fan et al., presented in their paper "Graph Neural Networks for Social Recommendation." Our work, "Reproducing GraphRec for Top-K Evaluation: A Case Study on Diversity Metrics," builds upon the foundational concepts of GraphRec and delves into its reproducibility, particularly focusing on top-k evaluation metrics.
 
-## Our Model GraphRec
-The overall architecture of the proposed model. It contains three major components: user modeling, item modeling, and rating prediction.The first component is user modeling, which is to learn latent factors of users. As data in social recommender systems includes two different graphs, i.e., a social graph and a user-item graph, we are provided with a great opportunity to learn user representations from different perspectives. Therefore, two aggregations are introduced to respectively process these two different graphs. One is item aggregation, which can be utilized to understand users via interactions between users and items in the user-item graph (or item-space). The other is social aggregation, the relationship between users in the social graph, which can help model users from the social perspective (or social-space). Then, it is intuitive to obtain user latent factors by combining information from both item space and social space. The second component is item modeling, which is to learn latent factors of items. In order to consider both interactions and opinions in the user-item graph, we introduce user aggregation, which is to aggregate users’ opinions in item modeling. The third component is to learn model parameters via prediction by integrating user and item modeling components.
+In the dynamic field of recommender systems, the GraphRec model, utilizing graph neural networks (GNNs) for social recommendation, has emerged as a significant approach. Our research not only reproduces but also extends the evaluation of GraphRec, highlighting several challenges, especially when shifting from rating prediction to a top-k offline evaluation setting. This work underscores the critical need for clear, detailed preprocessing documentation and brings to light the complexities involved in achieving reproducible results, even when the original codebase is accessible.
 
-![ 123](GraphRec.png "GraphRec")
+Our study is grounded in the context of the original GraphRec model, and we recommend referring to the [original GraphRec paper](https://dl.acm.org/doi/10.1145/3308558.3313417) for foundational knowledge:
 
+> Fan, W., Ma, Y., Li, Q., He, Y., Zhao, E., Tang, J., & Yin, D. (2019, May). Graph Neural Networks for Social Recommendation. In The World Wide Web Conference (pp. 417-426).
+### Abstract
 
-## Code
+_In the dynamic field of recommender systems, the GraphRec model has emerged as a popular approach. This paper details our efforts to reproduce and extend GraphRec's evaluation, revealing several challenges. We emphasize the need for detailed preprocessing documentation, discuss our transition to top-k evaluation setup, and point out the often-overlooked challenges in achieving reproducibility. Our results focus on recommendation diversity, showcasing the importance of top-k evaluations. Through this work, we aim to underscore the challenges of reproducibility in social recommendation systems._
 
-Author: Wenqi Fan (https://wenqifan03.github.io, email: wenqifan03@gmail.com) 
+## Research Questions
 
-Also, I would be more than happy to provide a detailed answer for any questions you may have regarding GraphRec.
+Our research revolves around three central questions:
 
-If you use this code, please cite our paper:
-```
-@inproceedings{fan2019graph,
-  title={Graph Neural Networks for Social Recommendation},
-  author={Fan, Wenqi and Ma, Yao and Li, Qing and He, Yuan and Zhao, Eric and Tang, Jiliang and Yin, Dawei},
-  booktitle={The World Wide Web Conference},
-  pages={417--426},
-  year={2019},
-  organization={ACM}
-}
-```
+1. **RQ1:** How does recommender system documentation clarity and availability influence the reproducibility of GraphRec?
+2. **RQ2:** What considerations arise when transitioning GraphRec from rating prediction to top-k evaluations?
+3. **RQ3:** How can best practices be improved for consistent and reproducible evaluations?
 
-## Environment Settings
-##### python: 3.6
-##### pytorch: 0.2+
+By exploring these questions, we seek to illuminate the often intricate process of model reproduction, particularly within the realm of social recommendation systems.
 
-## Example to run the codes
+## Contributions
 
-Run GraphRec:
-```
-python run_GraphRec_example.py
-```
+This study makes several contributions:
 
-Raw Datasets (Ciao and Epinions)  can be downloaded at [http://www.cse.msu.edu/~tangjili/trust.html](http://www.cse.msu.edu/~tangjili/trust.html)
+- An in-depth analysis of GraphRec's data preprocessing challenges, particularly with the Epinions and Ciao datasets.
+- Insights on adapting GraphRec for top-k recommendation evaluation, highlighting crucial decisions and their implications.
+- Best practices derived from our findings, intended to guide consistent and reproducible evaluations in future social recommendation research.
 
-## Deep Neural Networks for Social Recommendations
+## Repository Structure
 
-*  **<u>Wenqi Fan</u>**, Yao Ma , Qing Li, Jianping Wang, Guoyong Cai, Jiliang Tang, and Dawei Yin. **A Graph Neural Network Framework for Social Recommendations.** To appear in IEEE TRANSACTIONS ON KNOWLEDGE AND DATA ENGINEERING (IEEE TKDE), 2020.
+This repository is organized as follows:
 
-* **<u>Wenqi Fan</u>**, Yao Ma, Dawei Yin, Jianping Wang, Jiliang Tang, Qing Li.
-  **Deep Social Collaborative Filtering.** In Proceedings of the 13th ACM Conference on Recommender Systems (RecSys 2019), 2019. (Long Paper,  Acceptance rate: 19%.) [[Arxiv](https://arxiv.org/abs/1907.06853)]    
+- `data/`: Directory for storing raw and processed data.
+- `notebooks/`: Jupyter notebooks for various data explorations and analyses.
+- `elliot_config/`: Configuration files for baseline evaluations using the Elliot framework.
 
-* **<u>Wenqi Fan</u>**, Tyler Derr, Yao Ma, Jianping Wang, Jiliang Tang, Qing Li.
-  **Deep Adversarial Social Recommendation.**  In Proceedings of the International Joint Conference on Artificial Intelligence (IJCAI), 2019. [[Arxiv](https://arxiv.org/abs/1905.13160)]   [[Slides](https://drive.google.com/file/d/1lCvxGlkBm6ux3KderXlE0YE9ELSHlfbh/view?usp=sharing)]
+### Main Files
 
-* **<u>Wenqi Fan</u>**, Qing Li, Min Cheng. **Deep Modeling of Social Relations for Recommendation.**  In Proceedings of the Thirty-Second AAAI Conference on Artificial Intelligence. 2018. (Student Poster.)  [[PDF](https://www.aaai.org/ocs/index.php/AAAI/AAAI18/paper/viewPaper/16075)]
+- `download_datasets.py`: Script to download the Ciao and Epinions datasets from the specified source. The datasets are stored in `./data/raw`.
+- `preprocess_datasets.py`: Script for preprocessing the datasets. It includes various parameters for cleaning and structuring the data suitable for GraphRec and Elliot. Processed data is stored in `./data/processed/graphrec/` and `./data/processed/elliot/`.
+- `run_GraphRec_example.py`: An executable script that runs the original GraphRec approach for rating prediction. It includes the preprocessing pipeline and various parameters for dataset processing and model training.
+- `run_GraphRec_example_topk_BCE.py`: This script is used for evaluating the modified GraphRec approach using Binary Cross Entropy (BCE) in a top-k evaluation setting. It includes parameters for training and evaluation.
+- `run_ciao.sh` and `run_epinions.sh`: Shell scripts providing examples on how to execute `run_GraphRec_example.py` with different parameter combinations on the Ciao and Epinions datasets, respectively.
+- `./notebooks/data_exploration.py`: A Jupyter notebook containing data exploration for toy_dataset, Epinions, and Ciao datasets.
 
+### Configuration Files
 
+- `./elliot_config/`: This directory contains various configuration files used for baseline evaluations within the Elliot framework. More details about Elliot can be found [here](https://elliot.readthedocs.io/en/latest/).
 
-# Acknowledgements
-The original version of this code base was from GraphSage. We owe many thanks to William L. Hamilton for making his code available. 
-Please see the paper for funding details and additional (non-code related) acknowledgements.
+## Prerequisites
 
-Last Update Date: Oct, 2019
+Before you begin, ensure you have met the following requirements:
+
+- You have installed the latest version of [Python](https://www.python.org/).
+- You have a Windows/Linux/Mac machine capable of running Python 3.
+- You have installed [PyTorch](https://pytorch.org/). If you plan to run the model on a GPU, make sure to follow PyTorch’s instructions for [CUDA support](https://pytorch.org/get-started/locally/).
+
+## Setting Up and Running the Project
+
+This project is designed to be straightforward to set up and run. Below are the steps you need to follow to get everything ready and to initiate the model training:
+
+1. **Clone the repository:**
+
+    Start by cloning the repository to your local machine using the following command:
+
+    ```bash
+    git clone https://anonymous.4open.science/r/GraphRec-ECIR24/
+    ```
+
+    Don't forget to replace `your_username` and `your_project_name` with your GitHub username and your repository's name, respectively.
+
+2. **Navigate to the project directory:**
+
+    Change directories to enter the main project folder:
+
+    ```bash
+    cd your_project_name
+    ```
+
+3. **Download the datasets:**
+
+    Run the `download_datasets.py` script to fetch the Ciao and Epinions datasets. They will be stored in the appropriate `data` subdirectory.
+
+    ```bash
+    python download_datasets.py
+    ```
+
+4. **Preprocess the datasets:**
+
+    Once you've downloaded the datasets, run the `preprocess_datasets.py` script to prepare the data for training. This script cleans and structures the data, making it suitable for input into the GraphRec model.
+
+    ```bash
+    python preprocess_datasets.py
+    ```
+
+    This script includes several parameters that you can customize based on your requirements. Refer to the script's documentation for more details.
+
+5. **Model Training:**
+
+    After preprocessing the data, you can start the model training process. You can use the provided shell scripts or Python scripts (e.g., `run_GraphRec_example.py` or `run_GraphRec_example_topk_BCE.py`) to train the GraphRec model with your desired parameters.
+
+    ```bash
+    python run_GraphRec_example.py  # or any other relevant script
+    ```
+
+    If you prefer to run the model on a GPU, ensure you have the necessary CUDA support as required by PyTorch. The model can also run on a CPU if you don't have GPU support.
+
+6. **Evaluation:**
+
+    After training, you can evaluate the model's performance using various metrics. The necessary scripts and notebooks in the repository will guide you through this process.
+
+Please refer to the individual scripts' documentation within the repository for more detailed information on their usage and the various parameters you can adjust.

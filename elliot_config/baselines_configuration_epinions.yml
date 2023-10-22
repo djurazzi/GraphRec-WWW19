@@ -1,0 +1,52 @@
+experiment:
+  dataset: epinions
+  data_config:
+    strategy: fixed
+    train_path: ../../data/epinions/ecir24/ratings_train.tsv
+    test_path: ../../data/epinions/ecir24/ratings_test.tsv
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCG, Precision, Recall, Gini, SEntropy, UserCoverage, ItemCoverage]
+    paired_ttest: True
+    wilcoxon_test: True
+  gpu: 6
+  external_models_path: ../../external/models/__init__.py
+  models:
+    Random:
+      meta:
+        verbose: True
+        save_recs: True
+      seed: 42
+    MostPop:
+      meta:
+        save_recs: True
+    ItemKNN:
+      meta:
+        verbose: True
+        save_recs: True
+      neighbors: 40
+      similarity: cosine
+      implementation: standard
+    UserKNN:
+      meta:
+        save_recs: True
+      neighbors: 40
+      similarity: cosine
+      implementation: aiolli
+#    LightGCN:
+#      meta:
+#        save_recs: False
+#        verbose: True
+#      lr: 0.001
+#      epochs: 1000
+#      factors: 64
+#      batch_size: 1024
+#      l_w: 0.0001
+#      n_layers: 3
+#      n_fold: 100
+#      early_stopping:
+#        patience: 50 # int
+#        monitor: Recall@20
+#        mode: auto
+#        verbose: True

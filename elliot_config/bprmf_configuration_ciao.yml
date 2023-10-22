@@ -1,0 +1,24 @@
+experiment:
+  dataset: ciao
+  data_config:
+    strategy: fixed
+    train_path: ../../data/ciao/ecir24/ciao_filtered_ratings_train.tsv
+    test_path: ../../data/ciao/ecir24/ciao_filtered_ratings_test.tsv
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCG, Precision, Recall, Gini, SEntropy, UserCoverage, ItemCoverage]
+    paired_ttest: True
+    wilcoxon_test: True
+  gpu: 6
+  external_models_path: ../../external/models/__init__.py
+  models:
+    BPRMF_batch:
+      meta:
+        save_recs: True
+      epochs: 10
+      batch_size: 512
+      factors: 10
+      lr: 0.001
+      l_w: 0.1
+      l_b: 0.001

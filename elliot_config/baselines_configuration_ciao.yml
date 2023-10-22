@@ -1,0 +1,69 @@
+experiment:
+  dataset: ciao
+  data_config:
+    strategy: fixed
+    train_path: ../../data/ciao/ecir24/ciao_filtered_ratings_train.tsv
+    test_path: ../../data/ciao/ecir24/ciao_filtered_ratings_test.tsv
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCG, Precision, Recall, Gini, SEntropy, UserCoverage, ItemCoverage]
+    paired_ttest: True
+    wilcoxon_test: True
+  gpu: 6
+  external_models_path: ../../external/models/__init__.py
+  models:
+    Random:
+      meta:
+        verbose: True
+        save_recs: True
+      seed: 42
+    MostPop:
+      meta:
+        varbose: True
+        save_recs: True
+#    ItemKNN:
+#      meta:
+#        verbose: True
+#        save_recs: True
+#      neighbors: 40
+#      similarity: cosine
+#      implementation: standard
+#    UserKNN:
+#      meta:
+#        varbose: True
+#        save_recs: True
+#      neighbors: 40
+#      similarity: cosine
+#      implementation: aiolli
+#    PMF:
+#      meta:
+#        save_recs: True
+#        verbose: True
+#      epochs: 10
+#      batch_size: 512
+#      factors: 50
+#      lr: 0.001
+#      reg: 0.0025
+#      gaussian_variance: 0.1
+#      early_stopping:
+#        patience: 5 # int
+#        monitor: Recall@10
+#        mode: auto
+#        verbose: True
+#    LightGCN:
+#      meta:
+#        save_recs: False
+#        verbose: True
+#      lr: 0.001
+#      epochs: 1000
+#      factors: 64
+#      batch_size: 1024
+#      l_w: 0.0001
+#      n_layers: 3
+#      n_fold: 100
+#      early_stopping:
+#        patience: 50 # int
+#        monitor: Recall@20
+#        mode: auto
+#        verbose: True
